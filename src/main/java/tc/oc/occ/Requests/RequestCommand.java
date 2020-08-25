@@ -192,7 +192,7 @@ public class RequestCommand extends BaseCommand {
               .sorted(
                   (map1, map2) ->
                       Integer.compare(
-                          requests.getMapRequestCount(map1), requests.getMapRequestCount(map2)))
+                          requests.getMapRequestCount(map2), requests.getMapRequestCount(map1)))
               .limit(Math.min(requests.getRequestedMaps().size(), max))
               .collect(Collectors.toList())) {
         sendMessage(sender, formatMapClick(map, index));
