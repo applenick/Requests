@@ -1,0 +1,6 @@
+name: Requests
+description: ${project.description}
+main: tc.oc.occ.Requests.Requests
+version: ${project.version}
+depend: [PGM]
+author: ${project.author}

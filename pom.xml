@@ -1,0 +1,144 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>tc.oc.occ</groupId>
+	<artifactId>Requests</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
+	<name>Requests</name>
+	<description>A plugin to help with taking player map requests</description>
+
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.author>applenick</project.author>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+		</repository>
+		<repository>
+			<id>spigot-repo</id>
+			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+		</repository>
+		<repository>
+			<id>aikar</id>
+			<url>https://repo.aikar.co/content/groups/aikar/</url>
+		</repository>
+	</repositories>
+
+	<dependencies>
+		<!-- SportBukkit 1.8 -->
+		<dependency>
+			<groupId>app.ashcon</groupId>
+			<artifactId>sportpaper</artifactId>
+			<version>1.8.8-R0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- PGM -->
+		<dependency>
+			<groupId>tc.oc.pgm</groupId>
+			<artifactId>core</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>tc.oc.pgm</groupId>
+			<artifactId>util</artifactId>
+			<version>0.9-SNAPSHOT</version>
+		</dependency>
+
+		<!-- Command Framework - https://github.com/aikar/commands -->
+		<dependency>
+			<groupId>co.aikar</groupId>
+			<artifactId>acf-bukkit</artifactId>
+			<version>0.5.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+
+	<build>
+		<resources>
+			<!-- Include the required plugin.yml and config.yml for Bukkit -->
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<compilerArgs>
+						<arg>-parameters</arg> <!-- Required for aikar/commands to auto generate syntax -->
+					</compilerArgs>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.2.3</version>
+				<configuration>
+					<createDependencyReducedPom>false</createDependencyReducedPom>
+					<minimizeJar>true</minimizeJar>
+					<artifactSet>
+						<includes>
+							<include>co.aikar:*</include>
+							<include>net.kyori:text-*:*</include>
+						</includes>
+					</artifactSet>
+					<filters>
+						<filter>
+							<artifact>*:*</artifact>
+							<excludes>
+								<exclude>META-INF/**</exclude>
+							</excludes>
+						</filter>
+					</filters>
+					<relocations>
+						<relocation>
+							<pattern>co.aikar.commands</pattern>
+							<shadedPattern>tc.oc.occ.Requests.lib.acf</shadedPattern>
+						</relocation>
+						<relocation>
+							<pattern>net.kyori</pattern>
+							<shadedPattern>tc.occ.Requests.lib.net.kyori</shadedPattern>
+						</relocation>
+					</relocations>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Validates that code is properly formatted with Google's code style -->
+			<plugin>
+				<groupId>com.coveo</groupId>
+				<artifactId>fmt-maven-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<style>google</style>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>check</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
