@@ -10,7 +10,7 @@ import tc.oc.pgm.util.bukkit.BukkitUtils;
 
 public class Requests extends JavaPlugin {
 
-  // Inspired by 1.12 PGM and allows for map nap tab-complete to actually work :)
+  // Inspired by 1.12 PGM and allows for map name tab-complete to actually work :)
   public static final String SPACE = "\u2508";
 
   private RequestManager requests;
