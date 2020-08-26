@@ -8,7 +8,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
+import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
+import tc.oc.pgm.api.player.MatchPlayer;
 
 public class RequestManager {
 
@@ -18,8 +20,8 @@ public class RequestManager {
 
   private Set<UUID> verboseStaff;
 
-  public RequestManager() {
-    this.accepting = false;
+  public RequestManager(boolean enabled) {
+    this.accepting = enabled;
     this.requests = Maps.newHashMap();
     this.verboseStaff = Sets.newHashSet();
   }
@@ -60,6 +62,13 @@ public class RequestManager {
     return requests.entrySet().stream()
         .filter(e -> e.getValue().equals(info))
         .map(e -> e.getKey())
+        .collect(Collectors.toSet());
+  }
+
+  public Set<MatchPlayer> getOnlineMapRequesters(MapInfo info) {
+    return getMapRequesters(info).stream()
+        .filter(id -> PGM.get().getMatchManager().getPlayer(id) != null)
+        .map(playerId -> PGM.get().getMatchManager().getPlayer(playerId))
         .collect(Collectors.toSet());
   }
 

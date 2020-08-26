@@ -16,9 +16,13 @@ public class Requests extends JavaPlugin {
   private RequestManager requests;
   private BukkitCommandManager commands;
 
+  // Config values
+  private boolean defaultEnable;
+
   @Override
   public void onEnable() {
-    this.requests = new RequestManager();
+    this.setupConfig();
+    this.requests = new RequestManager(defaultEnable);
     this.setupCommands();
     getServer().getPluginManager().registerEvents(new RequestListener(requests), this);
   }
@@ -48,6 +52,13 @@ public class Requests extends JavaPlugin {
                   .collect(Collectors.toList());
             });
     commands.registerCommand(new RequestCommand());
+  }
+
+  private void setupConfig() {
+    this.saveDefaultConfig();
+    this.reloadConfig();
+
+    this.defaultEnable = getConfig().getBoolean("enabled");
   }
 
   public static final String format(String format, Object... args) {
