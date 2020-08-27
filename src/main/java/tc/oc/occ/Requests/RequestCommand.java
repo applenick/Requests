@@ -11,6 +11,7 @@ import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.bukkit.Bukkit;
@@ -78,21 +79,20 @@ public class RequestCommand extends BaseCommand {
           sender,
           TextComponent.builder()
               .append("You have already requested: ")
-              .append(formatMapName(map, MapNameStyle.COLOR_WITH_AUTHORS))
+              .append(formatMapName(map, MapNameStyle.COLOR))
               .build());
       return;
     }
+
+    boolean hadRequest = requests.hasRequest(sender);
 
     requests.request(sender, map);
 
     Component requestConfirm =
         TextComponent.builder()
             .append(" \u2714 ", TextColor.GREEN)
-            .append("Requested ", TextColor.DARK_PURPLE)
+            .append(hadRequest ? "Updated request to " : "Requested ", TextColor.DARK_PURPLE)
             .append(formatMapName(map, MapNameStyle.COLOR_WITH_AUTHORS))
-            .hoverEvent(
-                HoverEvent.showText(TextComponent.of("Click to view map info", TextColor.YELLOW)))
-            .clickEvent(ClickEvent.runCommand("/map " + map.getName()))
             .build();
     sendMessage(sender, requestConfirm);
 
@@ -243,16 +243,18 @@ public class RequestCommand extends BaseCommand {
               : false;
 
       sendMessage(sender, TextFormatter.horizontalLineHeading(sender, header, TextColor.GRAY));
-      int index = 1;
-      for (MapInfo map :
+
+      List<MapInfo> requestedMaps =
           requests.getRequestedMaps().stream()
               .filter(map -> !requests.getOnlineMapRequesters(map).isEmpty())
-              .sorted(
-                  (map1, map2) ->
-                      Integer.compare(
-                          requests.getMapRequestCount(map2), requests.getMapRequestCount(map1)))
-              .limit(Math.min(requests.getRequestedMaps().size(), max))
-              .collect(Collectors.toList())) {
+              .collect(Collectors.toList());
+      requestedMaps.sort(
+          (map1, map2) ->
+              -Integer.compare(
+                  requests.getMapRequestCount(map1), requests.getMapRequestCount(map2)));
+
+      int index = 1;
+      for (MapInfo map : requestedMaps.subList(0, Math.min(requestedMaps.size(), max))) {
         sendMessage(sender, formatMapClick(sender, map, index, includeVote));
         index++;
       }
@@ -291,7 +293,7 @@ public class RequestCommand extends BaseCommand {
     Component setNext =
         TextComponent.builder()
             .append("[")
-            .append("Set", TextColor.GOLD, TextDecoration.BOLD)
+            .append("Set", TextColor.DARK_GREEN, TextDecoration.BOLD)
             .append("]")
             .color(TextColor.GRAY)
             .hoverEvent(

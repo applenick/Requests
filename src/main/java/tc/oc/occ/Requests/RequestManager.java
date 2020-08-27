@@ -50,6 +50,10 @@ public class RequestManager {
     this.requests.put(sender.getUniqueId(), map);
   }
 
+  public boolean hasRequest(Player sender) {
+    return requests.containsKey(sender.getUniqueId());
+  }
+
   public @Nullable MapInfo getRequestedMap(Player player) {
     return requests.get(player.getUniqueId());
   }
@@ -73,8 +77,7 @@ public class RequestManager {
   }
 
   public int getMapRequestCount(MapInfo map) {
-    return Math.toIntExact(
-        requests.entrySet().stream().filter(e -> e.getValue().equals(map)).count());
+    return getOnlineMapRequesters(map).size();
   }
 
   public int getMapCount() {
