@@ -43,6 +43,7 @@ import tc.oc.pgm.util.text.types.PlayerComponent;
 public class RequestCommand extends BaseCommand {
 
   public static final String REQUEST_PERMISSION = "occ.command.request";
+  public static final String REQUEST_STAFF_PERMISSION = REQUEST_PERMISSION + ".staff";
 
   @Dependency private RequestManager requests;
 
@@ -101,7 +102,7 @@ public class RequestCommand extends BaseCommand {
 
   @CommandAlias("requests|rqst|reqs")
   @Description("Manage and view map requests")
-  @CommandPermission(REQUEST_PERMISSION + ".staff")
+  @CommandPermission(REQUEST_STAFF_PERMISSION)
   public class RequestStaffCommand extends BaseCommand {
 
     @Subcommand("clear")
@@ -266,12 +267,12 @@ public class RequestCommand extends BaseCommand {
       TextComponent.Builder status = TextComponent.builder().append("You have");
 
       if (requests.isVerbose(sender.getUniqueId())) {
-        requests.removeVerbosePlayer(sender.getUniqueId());
         status.append(" disabled ", TextColor.RED);
       } else {
-        requests.addVerbosePlayer(sender.getUniqueId());
         status.append(" enabled ", TextColor.GREEN);
       }
+      requests.setVerboseEntry(sender.getUniqueId(), !requests.isVerbose(sender.getUniqueId()));
+
       status.append("verbose map requests").color(TextColor.GRAY);
       sendWarning(sender, status.build());
     }

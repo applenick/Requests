@@ -18,24 +18,31 @@ public class RequestManager {
 
   private Map<UUID, MapInfo> requests; // Player ids to MapInfos.
 
-  private Set<UUID> verboseStaff;
+  private Map<UUID, Boolean> verboseStaff;
 
-  public RequestManager(boolean enabled) {
+  private boolean verbose;
+
+  public RequestManager(boolean enabled, boolean verbose) {
     this.accepting = enabled;
+    this.verbose = verbose;
     this.requests = Maps.newHashMap();
-    this.verboseStaff = Sets.newHashSet();
+    this.verboseStaff = Maps.newHashMap();
   }
 
-  public void addVerbosePlayer(UUID staff) {
-    this.verboseStaff.add(staff);
+  public boolean hasVerboseEntry(UUID staff) {
+    return verboseStaff.containsKey(staff);
   }
 
-  public void removeVerbosePlayer(UUID staff) {
-    this.verboseStaff.remove(staff);
+  public void setVerboseEntry(UUID staff, boolean verbose) {
+    this.verboseStaff.put(staff, verbose);
   }
 
   public boolean isVerbose(UUID playerId) {
-    return verboseStaff.contains(playerId);
+    return verboseStaff.getOrDefault(playerId, false);
+  }
+
+  public boolean isVerboseDefault() {
+    return verbose;
   }
 
   public boolean isAccepting() {

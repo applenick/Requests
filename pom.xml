@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tc.oc.occ</groupId>
 	<artifactId>Requests</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>Requests</name>
 	<description>A plugin to help with taking player map requests</description>
 

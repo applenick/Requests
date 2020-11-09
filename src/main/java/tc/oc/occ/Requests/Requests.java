@@ -19,10 +19,12 @@ public class Requests extends JavaPlugin {
   // Config values
   private boolean defaultEnable;
 
+  private boolean defaultVerbose;
+
   @Override
   public void onEnable() {
     this.setupConfig();
-    this.requests = new RequestManager(defaultEnable);
+    this.requests = new RequestManager(defaultEnable, defaultVerbose);
     this.setupCommands();
     getServer().getPluginManager().registerEvents(new RequestListener(requests), this);
   }
@@ -59,6 +61,7 @@ public class Requests extends JavaPlugin {
     this.reloadConfig();
 
     this.defaultEnable = getConfig().getBoolean("enabled");
+    this.defaultVerbose = getConfig().getBoolean("verbose");
   }
 
   public static final String format(String format, Object... args) {
