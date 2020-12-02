@@ -59,6 +59,20 @@ public class RequestCommand extends BaseCommand {
       return;
     }
 
+    if (!requests.canRequest(sender)) {
+      int secondsLeft = requests.getCooldownRemaining(sender);
+      sendWarning(
+          sender,
+          TextComponent.builder()
+              .append("Please wait ")
+              .append(TextComponent.of(secondsLeft, TextColor.AQUA))
+              .append(" second" + (secondsLeft != 1 ? "s" : ""))
+              .append(" before requesting a new map.")
+              .color(TextColor.GRAY)
+              .build());
+      return;
+    }
+
     if (input == null || input.isEmpty()) {
       MapInfo requested = requests.getRequestedMap(sender);
       if (requested != null) {
@@ -81,6 +95,7 @@ public class RequestCommand extends BaseCommand {
           TextComponent.builder()
               .append("You have already requested: ")
               .append(formatMapName(map, MapNameStyle.COLOR))
+              .color(TextColor.GRAY)
               .build());
       return;
     }
@@ -351,7 +366,9 @@ public class RequestCommand extends BaseCommand {
   }
 
   private void sendWarning(CommandSender sender, Component message) {
-    Audience.get(sender).sendWarning(message);
+    Audience.get(sender)
+        .sendMessage(
+            TextComponent.builder().append("\u26a0 ", TextColor.YELLOW).append(message).build());
   }
 
   private Component formatMapName(MapInfo info, MapNameStyle style) {

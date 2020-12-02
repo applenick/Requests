@@ -1,12 +1,18 @@
 package tc.oc.occ.Requests;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import tc.oc.pgm.api.PGM;
 import tc.oc.pgm.api.map.MapInfo;
@@ -20,13 +26,19 @@ public class RequestManager {
 
   private Map<UUID, Boolean> verboseStaff;
 
-  private boolean verbose;
+  private Cache<UUID, Instant> cooldownCache;
 
-  public RequestManager(boolean enabled, boolean verbose) {
+  private boolean verbose;
+  private final int cooldownSeconds;
+
+  public RequestManager(boolean enabled, boolean verbose, int cooldownSeconds) {
     this.accepting = enabled;
     this.verbose = verbose;
+    this.cooldownSeconds = cooldownSeconds;
     this.requests = Maps.newHashMap();
     this.verboseStaff = Maps.newHashMap();
+    this.cooldownCache =
+        CacheBuilder.newBuilder().expireAfterWrite(cooldownSeconds, TimeUnit.SECONDS).build();
   }
 
   public boolean hasVerboseEntry(UUID staff) {
@@ -55,10 +67,24 @@ public class RequestManager {
 
   public void request(Player sender, MapInfo map) {
     this.requests.put(sender.getUniqueId(), map);
+    this.cooldownCache.put(sender.getUniqueId(), Instant.now());
   }
 
   public boolean hasRequest(Player sender) {
     return requests.containsKey(sender.getUniqueId());
+  }
+
+  public boolean canRequest(Player player) {
+    return cooldownCache.getIfPresent(player.getUniqueId()) == null;
+  }
+
+  public int getCooldownRemaining(Player player) {
+    Instant lastRequest = cooldownCache.getIfPresent(player.getUniqueId());
+    if (lastRequest == null) {
+      return 0;
+    }
+    return cooldownSeconds
+        - Math.toIntExact(Duration.between(lastRequest, Instant.now()).getSeconds());
   }
 
   public @Nullable MapInfo getRequestedMap(Player player) {
@@ -88,11 +114,12 @@ public class RequestManager {
   }
 
   public int getMapCount() {
-    return getRequestedMaps().size();
+    return getRequestedMaps().stream().mapToInt(m -> getOnlineMapRequesters(m).size()).sum();
   }
 
   public int getRequesterCount() {
-    return requests.keySet().size();
+    return Math.toIntExact(
+        requests.keySet().stream().filter(id -> Bukkit.getPlayer(id) != null).count());
   }
 
   public int clearRequests(MapInfo map) {

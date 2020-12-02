@@ -21,10 +21,12 @@ public class Requests extends JavaPlugin {
 
   private boolean defaultVerbose;
 
+  private int cooldownSeconds;
+
   @Override
   public void onEnable() {
     this.setupConfig();
-    this.requests = new RequestManager(defaultEnable, defaultVerbose);
+    this.requests = new RequestManager(defaultEnable, defaultVerbose, cooldownSeconds);
     this.setupCommands();
     getServer().getPluginManager().registerEvents(new RequestListener(requests), this);
   }
@@ -62,6 +64,7 @@ public class Requests extends JavaPlugin {
 
     this.defaultEnable = getConfig().getBoolean("enabled");
     this.defaultVerbose = getConfig().getBoolean("verbose");
+    this.cooldownSeconds = getConfig().getInt("cooldown");
   }
 
   public static final String format(String format, Object... args) {

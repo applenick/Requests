@@ -1,3 +1,5 @@
 enabled: true
 
 verbose: true
+
+cooldown: 15 # Seconds
