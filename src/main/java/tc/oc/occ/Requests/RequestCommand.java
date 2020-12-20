@@ -1,5 +1,8 @@
 package tc.oc.occ.Requests;
 
+import static tc.oc.pgm.lib.net.kyori.adventure.text.Component.newline;
+import static tc.oc.pgm.lib.net.kyori.adventure.text.Component.text;
+
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.annotation.CommandAlias;
@@ -23,18 +26,18 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.lib.net.kyori.text.Component;
-import tc.oc.pgm.lib.net.kyori.text.TextComponent;
-import tc.oc.pgm.lib.net.kyori.text.event.ClickEvent;
-import tc.oc.pgm.lib.net.kyori.text.event.HoverEvent;
-import tc.oc.pgm.lib.net.kyori.text.format.TextColor;
-import tc.oc.pgm.lib.net.kyori.text.format.TextDecoration;
+import tc.oc.pgm.lib.net.kyori.adventure.text.Component;
+import tc.oc.pgm.lib.net.kyori.adventure.text.TextComponent;
+import tc.oc.pgm.lib.net.kyori.adventure.text.event.ClickEvent;
+import tc.oc.pgm.lib.net.kyori.adventure.text.event.HoverEvent;
+import tc.oc.pgm.lib.net.kyori.adventure.text.format.NamedTextColor;
+import tc.oc.pgm.lib.net.kyori.adventure.text.format.TextDecoration;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.VotingPool;
+import tc.oc.pgm.util.Audience;
 import tc.oc.pgm.util.LegacyFormatUtils;
 import tc.oc.pgm.util.UsernameFormatUtils;
-import tc.oc.pgm.util.chat.Audience;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
@@ -54,8 +57,7 @@ public class RequestCommand extends BaseCommand {
   @CommandCompletion("@maps")
   public void requestMap(Player sender, @Optional String input) {
     if (!requests.isAccepting()) {
-      sendWarning(
-          sender, TextComponent.of("Sorry, map requests are not being accepted at this time"));
+      sendWarning(sender, text("Sorry, map requests are not being accepted at this time"));
       return;
     }
 
@@ -63,13 +65,11 @@ public class RequestCommand extends BaseCommand {
       int secondsLeft = requests.getCooldownRemaining(sender);
       sendWarning(
           sender,
-          TextComponent.builder()
-              .append("Please wait ")
-              .append(TextComponent.of(secondsLeft, TextColor.AQUA))
-              .append(" second" + (secondsLeft != 1 ? "s" : ""))
-              .append(" before requesting a new map.")
-              .color(TextColor.GRAY)
-              .build());
+          text("Please wait ")
+              .append(text(secondsLeft, NamedTextColor.AQUA))
+              .append(text(" second" + (secondsLeft != 1 ? "s" : "")))
+              .append(text(" before requesting a new map."))
+              .color(NamedTextColor.GRAY));
       return;
     }
 
@@ -78,12 +78,10 @@ public class RequestCommand extends BaseCommand {
       if (requested != null) {
         sendWarning(
             sender,
-            TextComponent.builder()
-                .append("You have already requested a map: ", TextColor.DARK_PURPLE)
-                .append(formatMapName(requested, MapNameStyle.COLOR_WITH_AUTHORS))
-                .build());
+            text("You have already requested a map: ", NamedTextColor.DARK_PURPLE)
+                .append(formatMapName(requested, MapNameStyle.COLOR_WITH_AUTHORS)));
       } else {
-        sendWarning(sender, TextComponent.of("You have not requested a map yet"));
+        sendWarning(sender, text("You have not requested a map yet"));
       }
       return;
     }
@@ -92,11 +90,9 @@ public class RequestCommand extends BaseCommand {
     if (requests.getRequestedMap(sender) != null && requests.getRequestedMap(sender).equals(map)) {
       sendWarning(
           sender,
-          TextComponent.builder()
-              .append("You have already requested: ")
+          text("You have already requested: ")
               .append(formatMapName(map, MapNameStyle.COLOR))
-              .color(TextColor.GRAY)
-              .build());
+              .color(NamedTextColor.GRAY));
       return;
     }
 
@@ -105,11 +101,10 @@ public class RequestCommand extends BaseCommand {
     requests.request(sender, map);
 
     Component requestConfirm =
-        TextComponent.builder()
-            .append(" \u2714 ", TextColor.GREEN)
-            .append(hadRequest ? "Updated request to " : "Requested ", TextColor.DARK_PURPLE)
-            .append(formatMapName(map, MapNameStyle.COLOR_WITH_AUTHORS))
-            .build();
+        text(" \u2714 ", NamedTextColor.GREEN)
+            .append(
+                text(hadRequest ? "Updated request to " : "Requested ", NamedTextColor.DARK_PURPLE))
+            .append(formatMapName(map, MapNameStyle.COLOR_WITH_AUTHORS));
     sendMessage(sender, requestConfirm);
 
     sendVerboseRequest(sender, map);
@@ -124,133 +119,113 @@ public class RequestCommand extends BaseCommand {
     @Description("Clear map requests for everyone or a single map")
     @CommandCompletion("@requested")
     public void clearRequestsCommand(CommandSender sender, @Optional String map) {
-      TextComponent.Builder broadcast =
-          TextComponent.builder().append(formatStaffName(sender)).append(" removed all ");
+      Component broadcast = formatStaffName(sender).append(text(" removed all "));
       int removed = 0;
 
       if (map != null && !map.isEmpty()) {
         MapInfo mapInfo = parseMapText(map);
         removed = requests.clearRequests(mapInfo);
-        broadcast.append("requests for ").append(formatMapName(mapInfo, MapNameStyle.COLOR));
+        broadcast.append(text("requests for ")).append(formatMapName(mapInfo, MapNameStyle.COLOR));
       } else {
-        broadcast.append("map requests");
+        broadcast.append(text("map requests"));
         removed = requests.clearAll();
       }
 
       broadcast
-          .append(" (")
-          .append(TextComponent.of(removed, TextColor.RED, TextDecoration.BOLD))
-          .append(")")
-          .color(TextColor.GRAY)
-          .build();
-      broadcastAC(sender, broadcast.build());
+          .append(text(" ("))
+          .append(text(removed, NamedTextColor.RED, TextDecoration.BOLD))
+          .append(text(")"))
+          .color(NamedTextColor.GRAY);
+      broadcastAC(sender, broadcast);
     }
 
     @Subcommand("broadcast|announce")
     @Description("Broadcast an announcement to inform players you're taking requests")
     public void broadcastCommand(CommandSender sender, @Default("false") boolean showName) {
       if (!requests.isAccepting()) {
-        sendWarning(
-            sender,
-            TextComponent.of("Map requests are not enabled! Unable to broadcast announcement"));
+        sendWarning(sender, text("Map requests are not enabled! Unable to broadcast announcement"));
         return;
       }
 
-      TextComponent.Builder broadcast =
-          TextComponent.builder().append(TextComponent.newline()).append(TextComponent.newline());
+      Component broadcast = newline().append(newline());
 
-      TextComponent.Builder alert = TextComponent.builder();
-
-      if (showName) {
-        alert.append(formatStaffName(sender)).append(" is ");
-      } else {
-        alert.append("We are ");
-      }
-      alert.append("accepting map requests");
+      Component named = formatStaffName(sender).append(text(" is "));
+      Component alert = showName ? named : text("We are");
+      alert.append(text("accepting map requests"));
 
       broadcast
           .append(
               TextFormatter.horizontalLineHeading(
                   sender,
-                  alert.color(TextColor.YELLOW).build(),
-                  TextColor.GOLD,
+                  alert.color(NamedTextColor.YELLOW),
+                  NamedTextColor.GOLD,
                   TextDecoration.OBFUSCATED,
                   LegacyFormatUtils.MAX_CHAT_WIDTH))
-          .append(TextComponent.newline())
-          .append("  ")
+          .append(newline())
+          .append(text("  "))
           .append(DIV)
-          .append("Use ")
-          .append("/request [map]", TextColor.AQUA, TextDecoration.UNDERLINED)
-          .append(" submit your request")
+          .append(text("Use "))
+          .append(text("/request [map]", NamedTextColor.AQUA, TextDecoration.UNDERLINED))
+          .append(text(" submit your request"))
           .append(RDIV)
-          .append(TextComponent.newline())
-          .append(TextComponent.newline())
-          .color(TextColor.GREEN)
-          .hoverEvent(
-              HoverEvent.showText(TextComponent.of("Click to request a map", TextColor.GRAY)))
+          .append(newline())
+          .append(newline())
+          .color(NamedTextColor.GREEN)
+          .hoverEvent(HoverEvent.showText(text("Click to request a map", NamedTextColor.GRAY)))
           .clickEvent(ClickEvent.suggestCommand("/request"));
 
-      broadcastEveryone(broadcast.build());
+      broadcastEveryone(broadcast);
     }
 
     @Subcommand("toggle")
     @Description("Toggle whether map requests are accepted")
     public void toggleRequestsCommand(CommandSender sender) {
       requests.toggleAccepting();
-      TextComponent.Builder broadcast =
-          TextComponent.builder()
-              .append(formatStaffName(sender))
-              .append(" has ")
+      Component broadcast =
+          formatStaffName(sender)
+              .append(text(" has "))
               .append(
-                  requests.isAccepting() ? "enabled" : "disabled",
-                  requests.isAccepting() ? TextColor.GREEN : TextColor.RED,
-                  TextDecoration.BOLD)
-              .append(" map requests");
+                  text(
+                      requests.isAccepting() ? "enabled" : "disabled",
+                      requests.isAccepting() ? NamedTextColor.GREEN : NamedTextColor.RED,
+                      TextDecoration.BOLD))
+              .append(text(" map requests"));
 
       if (requests.isAccepting()) {
         broadcast
             .hoverEvent(
-                HoverEvent.showText(
-                    TextComponent.of("Click to view player map requests", TextColor.GRAY)))
+                HoverEvent.showText(text("Click to view player map requests", NamedTextColor.GRAY)))
             .clickEvent(ClickEvent.runCommand("/requests"));
       }
-      broadcastAC(sender, broadcast.color(TextColor.GRAY).build());
+      broadcastAC(sender, broadcast.color(NamedTextColor.GRAY));
     }
 
     @Default
     @Syntax("[max maps]")
     public void listRequests(CommandSender sender, @Default("10") int amount) {
       if (!requests.isAccepting()) {
-        sendWarning(
-            sender, TextComponent.of("Map requests are disabled. Use /requests toggle to enable"));
+        sendWarning(sender, text("Map requests are disabled. Use /requests toggle to enable"));
         return;
       }
 
       int max = Math.max(10, amount); // Amount of requests to show
 
-      Component title =
-          TextComponent.of("Map Requests", TextColor.DARK_PURPLE, TextDecoration.BOLD);
+      Component title = text("Map Requests", NamedTextColor.DARK_PURPLE, TextDecoration.BOLD);
       Component mapCount =
-          TextComponent.builder()
-              .append(TextComponent.of(requests.getRequestedMaps().size(), TextColor.YELLOW))
-              .hoverEvent(HoverEvent.showText(TextComponent.of("Maps", TextColor.GRAY)))
-              .build();
+          text(requests.getRequestedMaps().size(), NamedTextColor.YELLOW)
+              .hoverEvent(HoverEvent.showText(text("Maps", NamedTextColor.GRAY)));
 
       Component playerCount =
-          TextComponent.builder()
-              .append(TextComponent.of(requests.getRequesterCount(), TextColor.YELLOW))
-              .hoverEvent(HoverEvent.showText(TextComponent.of("Players", TextColor.GRAY)))
-              .build();
+          text(requests.getRequesterCount(), NamedTextColor.YELLOW)
+              .hoverEvent(HoverEvent.showText(text("Players", NamedTextColor.GRAY)));
 
       Component header =
-          TextComponent.builder()
-              .append(title)
-              .append(" - ")
+          title
+              .append(text(" - "))
               .append(mapCount)
-              .append(":")
+              .append(text(":"))
               .append(playerCount)
-              .color(TextColor.GRAY)
-              .build();
+              .color(NamedTextColor.GRAY);
 
       MapOrder order = PGM.get().getMapOrder();
       boolean includeVote =
@@ -258,7 +233,7 @@ public class RequestCommand extends BaseCommand {
               ? ((MapPoolManager) order).getActiveMapPool() instanceof VotingPool
               : false;
 
-      sendMessage(sender, TextFormatter.horizontalLineHeading(sender, header, TextColor.GRAY));
+      sendMessage(sender, TextFormatter.horizontalLineHeading(sender, header, NamedTextColor.GRAY));
 
       List<MapInfo> requestedMaps =
           requests.getRequestedMaps().stream()
@@ -279,69 +254,64 @@ public class RequestCommand extends BaseCommand {
     @Subcommand("verbose|vb")
     @Description("Toggle verbose request messages")
     public void toggleVerbose(Player sender) {
-      TextComponent.Builder status = TextComponent.builder().append("You have");
+      Component status = text("You have");
 
       if (requests.isVerbose(sender.getUniqueId())) {
-        status.append(" disabled ", TextColor.RED);
+        status.append(text(" disabled ", NamedTextColor.RED));
       } else {
-        status.append(" enabled ", TextColor.GREEN);
+        status.append(text(" enabled ", NamedTextColor.GREEN));
       }
       requests.setVerboseEntry(sender.getUniqueId(), !requests.isVerbose(sender.getUniqueId()));
 
-      status.append("verbose map requests").color(TextColor.GRAY);
-      sendWarning(sender, status.build());
+      status.append(text("verbose map requests")).color(NamedTextColor.GRAY);
+      sendWarning(sender, status);
     }
   }
 
-  public static final Component DIV = TextComponent.of(" \u00BB ", TextColor.GRAY);
-  public static final Component RDIV = TextComponent.of(" \u00AB ", TextColor.GRAY);
+  public static final Component DIV = text(" \u00BB ", NamedTextColor.GRAY);
+  public static final Component RDIV = text(" \u00AB ", NamedTextColor.GRAY);
 
   private Component formatMapClick(
       CommandSender sender, MapInfo map, int index, boolean includeVote) {
     Set<MatchPlayer> names = requests.getOnlineMapRequesters(map);
 
     int mapRequestCount = names.size();
-    Component count = TextComponent.of(mapRequestCount, TextColor.GREEN);
+    Component count = text(mapRequestCount, NamedTextColor.GREEN);
     count =
         count.hoverEvent(
-            HoverEvent.showText(TextFormatter.nameList(names, NameStyle.FANCY, TextColor.GRAY)));
+            HoverEvent.showText(
+                TextFormatter.nameList(names, NameStyle.FANCY, NamedTextColor.GRAY)));
 
     Component setNext =
-        TextComponent.builder()
-            .append("[")
-            .append("Set", TextColor.DARK_GREEN, TextDecoration.BOLD)
-            .append("]")
-            .color(TextColor.GRAY)
-            .hoverEvent(
-                HoverEvent.showText(TextComponent.of("Click to setnext this map", TextColor.GRAY)))
-            .clickEvent(ClickEvent.runCommand("/setnext " + map.getName()))
-            .build();
+        text("[")
+            .append(text("Set", NamedTextColor.DARK_GREEN, TextDecoration.BOLD))
+            .append(text("]"))
+            .color(NamedTextColor.GRAY)
+            .hoverEvent(HoverEvent.showText(text("Click to setnext this map", NamedTextColor.GRAY)))
+            .clickEvent(ClickEvent.runCommand("/setnext " + map.getName()));
 
     Component vote =
-        TextComponent.builder()
-            .append("[")
-            .append("Vote", TextColor.LIGHT_PURPLE, TextDecoration.BOLD)
-            .append("]")
-            .color(TextColor.GRAY)
+        text("[")
+            .append(text("Vote", NamedTextColor.LIGHT_PURPLE, TextDecoration.BOLD))
+            .append(text("]"))
+            .color(NamedTextColor.GRAY)
             .hoverEvent(
-                HoverEvent.showText(
-                    TextComponent.of("Click to add this map to the vote", TextColor.GRAY)))
-            .clickEvent(ClickEvent.runCommand("/vote add " + map.getName()))
-            .build();
+                HoverEvent.showText(text("Click to add this map to the vote", NamedTextColor.GRAY)))
+            .clickEvent(ClickEvent.runCommand("/vote add " + map.getName()));
 
     TextComponent.Builder mapRequest =
-        TextComponent.builder()
-            .append(TextComponent.of(index, TextColor.GRAY))
-            .append(". ")
+        text()
+            .append(text(index, NamedTextColor.GRAY))
+            .append(text(". "))
             .append(formatMapName(map, MapNameStyle.COLOR))
             .append(DIV)
             .append(count)
-            .append(" request" + (mapRequestCount != 1 ? "s" : ""), TextColor.GRAY)
+            .append(text(" request" + (mapRequestCount != 1 ? "s" : ""), NamedTextColor.GRAY))
             .append(DIV)
             .append(setNext);
 
     if (includeVote) {
-      mapRequest.append(" ").append(vote);
+      mapRequest.append(text(" ")).append(vote);
     }
 
     return mapRequest.build();
@@ -349,12 +319,10 @@ public class RequestCommand extends BaseCommand {
 
   private void sendVerboseRequest(Player requester, MapInfo request) {
     Component verbose =
-        TextComponent.builder()
-            .append(PlayerComponent.of(requester, NameStyle.FANCY))
-            .append(" requested ")
+        PlayerComponent.player(requester, NameStyle.FANCY)
+            .append(text(" requested "))
             .append(formatMapName(request, MapNameStyle.COLOR))
-            .color(TextColor.GRAY)
-            .build();
+            .color(NamedTextColor.GRAY);
 
     Bukkit.getOnlinePlayers().stream()
         .filter(pl -> requests.isVerbose(pl.getUniqueId()))
@@ -366,17 +334,13 @@ public class RequestCommand extends BaseCommand {
   }
 
   private void sendWarning(CommandSender sender, Component message) {
-    Audience.get(sender)
-        .sendMessage(
-            TextComponent.builder().append("\u26a0 ", TextColor.YELLOW).append(message).build());
+    Audience.get(sender).sendMessage(text("\u26a0 ", NamedTextColor.YELLOW).append(message));
   }
 
   private Component formatMapName(MapInfo info, MapNameStyle style) {
-    return TextComponent.builder()
-        .append(info.getStyledName(style))
-        .hoverEvent(HoverEvent.showText(TextComponent.of("Click to view map info", TextColor.GRAY)))
-        .clickEvent(ClickEvent.runCommand("/map " + info.getName()))
-        .build();
+    return info.getStyledName(style)
+        .hoverEvent(HoverEvent.showText(text("Click to view map info", NamedTextColor.GRAY)))
+        .clickEvent(ClickEvent.runCommand("/map " + info.getName()));
   }
 
   private Component formatStaffName(CommandSender sender) {
@@ -384,7 +348,7 @@ public class RequestCommand extends BaseCommand {
     if (match != null) {
       return UsernameFormatUtils.formatStaffName(sender, match);
     } else {
-      return PlayerComponent.of(sender, NameStyle.CONCISE);
+      return PlayerComponent.player(sender, NameStyle.CONCISE);
     }
   }
 
