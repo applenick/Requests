@@ -119,7 +119,8 @@ public class RequestCommand extends BaseCommand {
     @Description("Clear map requests for everyone or a single map")
     @CommandCompletion("@requested")
     public void clearRequestsCommand(CommandSender sender, @Optional String map) {
-      Component broadcast = formatStaffName(sender).append(text(" removed all "));
+      TextComponent.Builder broadcast =
+          text().append(formatStaffName(sender)).append(text(" removed all "));
       int removed = 0;
 
       if (map != null && !map.isEmpty()) {
@@ -136,7 +137,7 @@ public class RequestCommand extends BaseCommand {
           .append(text(removed, NamedTextColor.RED, TextDecoration.BOLD))
           .append(text(")"))
           .color(NamedTextColor.GRAY);
-      broadcastAC(sender, broadcast);
+      broadcastAC(sender, broadcast.build());
     }
 
     @Subcommand("broadcast|announce")
@@ -147,19 +148,20 @@ public class RequestCommand extends BaseCommand {
         return;
       }
 
-      Component broadcast = newline().append(newline());
+      TextComponent.Builder broadcast = text().append(newline()).append(newline());
 
       Component named = formatStaffName(sender).append(text(" is "));
-      Component alert = showName ? named : text("We are");
+      TextComponent.Builder alert = text().append(showName ? named : text("We are "));
       alert.append(text("accepting map requests"));
+      alert.color(NamedTextColor.YELLOW);
 
       broadcast
           .append(
               TextFormatter.horizontalLineHeading(
                   sender,
-                  alert.color(NamedTextColor.YELLOW),
+                  alert.build(),
                   NamedTextColor.GOLD,
-                  TextDecoration.OBFUSCATED,
+                  TextDecoration.STRIKETHROUGH,
                   LegacyFormatUtils.MAX_CHAT_WIDTH))
           .append(newline())
           .append(text("  "))
@@ -174,7 +176,7 @@ public class RequestCommand extends BaseCommand {
           .hoverEvent(HoverEvent.showText(text("Click to request a map", NamedTextColor.GRAY)))
           .clickEvent(ClickEvent.suggestCommand("/request"));
 
-      broadcastEveryone(broadcast);
+      broadcastEveryone(broadcast.build());
     }
 
     @Subcommand("toggle")
@@ -225,7 +227,7 @@ public class RequestCommand extends BaseCommand {
               .append(mapCount)
               .append(text(":"))
               .append(playerCount)
-              .color(NamedTextColor.GRAY);
+              .colorIfAbsent(NamedTextColor.GRAY);
 
       MapOrder order = PGM.get().getMapOrder();
       boolean includeVote =
@@ -254,7 +256,7 @@ public class RequestCommand extends BaseCommand {
     @Subcommand("verbose|vb")
     @Description("Toggle verbose request messages")
     public void toggleVerbose(Player sender) {
-      Component status = text("You have");
+      TextComponent.Builder status = text().append(text("You have"));
 
       if (requests.isVerbose(sender.getUniqueId())) {
         status.append(text(" disabled ", NamedTextColor.RED));
@@ -264,7 +266,7 @@ public class RequestCommand extends BaseCommand {
       requests.setVerboseEntry(sender.getUniqueId(), !requests.isVerbose(sender.getUniqueId()));
 
       status.append(text("verbose map requests")).color(NamedTextColor.GRAY);
-      sendWarning(sender, status);
+      sendWarning(sender, status.build());
     }
   }
 
