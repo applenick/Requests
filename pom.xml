@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>tc.oc.occ</groupId>
 	<artifactId>Requests</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<name>Requests</name>
 	<description>A plugin to help with taking player map requests</description>
 
@@ -43,13 +43,13 @@
 		<dependency>
 			<groupId>tc.oc.pgm</groupId>
 			<artifactId>core</artifactId>
-			<version>0.11-SNAPSHOT</version>
+			<version>0.12-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>tc.oc.pgm</groupId>
 			<artifactId>util</artifactId>
-			<version>0.11-SNAPSHOT</version>
+			<version>0.12-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
 
@@ -107,10 +107,6 @@
 						<relocation>
 							<pattern>co.aikar.commands</pattern>
 							<shadedPattern>tc.oc.occ.Requests.lib.acf</shadedPattern>
-						</relocation>
-						<relocation>
-							<pattern>net.kyori</pattern>
-							<shadedPattern>tc.oc.pgm.lib.net.kyori</shadedPattern>
 						</relocation>
 					</relocations>
 				</configuration>

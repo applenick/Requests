@@ -1,7 +1,7 @@
 package tc.oc.occ.Requests;
 
-import static tc.oc.pgm.lib.net.kyori.adventure.text.Component.newline;
-import static tc.oc.pgm.lib.net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.newline;
+import static net.kyori.adventure.text.Component.text;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.InvalidCommandArgument;
@@ -17,6 +17,12 @@ import co.aikar.commands.annotation.Syntax;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -26,12 +32,7 @@ import tc.oc.pgm.api.map.MapInfo;
 import tc.oc.pgm.api.map.MapOrder;
 import tc.oc.pgm.api.match.Match;
 import tc.oc.pgm.api.player.MatchPlayer;
-import tc.oc.pgm.lib.net.kyori.adventure.text.Component;
-import tc.oc.pgm.lib.net.kyori.adventure.text.TextComponent;
-import tc.oc.pgm.lib.net.kyori.adventure.text.event.ClickEvent;
-import tc.oc.pgm.lib.net.kyori.adventure.text.event.HoverEvent;
-import tc.oc.pgm.lib.net.kyori.adventure.text.format.NamedTextColor;
-import tc.oc.pgm.lib.net.kyori.adventure.text.format.TextDecoration;
+import tc.oc.pgm.api.text.PlayerComponent;
 import tc.oc.pgm.listeners.ChatDispatcher;
 import tc.oc.pgm.rotation.MapPoolManager;
 import tc.oc.pgm.rotation.VotingPool;
@@ -41,7 +42,6 @@ import tc.oc.pgm.util.UsernameFormatUtils;
 import tc.oc.pgm.util.named.MapNameStyle;
 import tc.oc.pgm.util.named.NameStyle;
 import tc.oc.pgm.util.text.TextFormatter;
-import tc.oc.pgm.util.text.types.PlayerComponent;
 
 public class RequestCommand extends BaseCommand {
 
