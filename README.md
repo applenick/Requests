@@ -1,6 +1,8 @@
 # Requests
 A plugin for handling PGM Map Requests
 
+⚠️ This project is no longer maintained, consider using [PGMDev/Community](https://github.com/PGMDev/Community) 
+
 ## Commands
 | Command | Description | Permission |
 -------------|-------------|---------------
